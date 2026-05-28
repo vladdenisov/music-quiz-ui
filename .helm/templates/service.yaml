@@ -11,3 +11,21 @@ spec:
       targetPort: {{ $.Values.service.targetServicePort }}
       protocol: TCP
   type: ClusterIP
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: "{{ .Chart.Name }}-ingress"
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: |
+        Host(`quiz.aqua.denisovv.me`)
+      services:
+        - name: {{ .Chart.Name }}-service
+          port: {{ .Values.service.port }}
+  tls:
+    certResolver: le
