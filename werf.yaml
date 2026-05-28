@@ -7,5 +7,7 @@ deploy:
 image: music-quiz-ui
 dockerfile: Dockerfile
 context: .
+args:
+  VITE_API_URL: /api/
 platform:
   - linux/amd64

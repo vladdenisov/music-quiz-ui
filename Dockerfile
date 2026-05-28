@@ -12,12 +12,15 @@ RUN pnpm install --frozen-lockfile
 
 # Copy the rest of the application code
 COPY . .
-ENV VITE_API_URL="/api/"
 
-# Mock Authentication (set to 'true' to bypass real API calls)
-ENV VITE_MOCK_AUTH=false
-# Build the application
-RUN pnpm run build
+# Vite inlines VITE_* at build time; Helm ConfigMap vars are runtime-only (nginx proxy).
+ARG VITE_API_URL=/api/
+ARG VITE_SOCKET_URL=
+ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_SOCKET_URL=$VITE_SOCKET_URL
+
+RUN echo "Build env: VITE_API_URL=$VITE_API_URL VITE_SOCKET_URL=${VITE_SOCKET_URL:-<same-origin>}" \
+  && pnpm run build
 
 FROM nginx
 COPY --from=builder /app/dist /usr/share/nginx/html
