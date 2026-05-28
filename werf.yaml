@@ -7,7 +7,5 @@ deploy:
 image: music-quiz-ui
 dockerfile: Dockerfile
 context: .
-contextAddFiles:
-  - dist/
 platform:
   - linux/amd64
