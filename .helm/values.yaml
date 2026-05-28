@@ -17,5 +17,5 @@ app:
 
 config:
   prod:
-    apiUrl: http://music-quiz-api.apps.svc.cluster.local:3001
-    socketUrl: http://music-quiz-api.apps.svc.cluster.local:3001
+    apiUrl: http://music-quiz-service.apps.svc.cluster.local:3001
+    socketUrl: http://music-quiz-service.apps.svc.cluster.local:3001
