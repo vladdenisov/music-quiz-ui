@@ -106,6 +106,8 @@ export function RoomPage() {
         </section>
       ) : !room ? (
         <section className="panel p-8 text-lg font-semibold">Загружаем комнату</section>
+      ) : preparing ? (
+        <PreparingView preparing={preparing} />
       ) : room.status === "lobby" ? (
         <LobbyView
           room={room}
@@ -121,8 +123,6 @@ export function RoomPage() {
             {strings.backHome}
           </Link>
         </section>
-      ) : preparing ? (
-        <PreparingView preparing={preparing} />
       ) : (
         <GameView
           round={activeRound}
