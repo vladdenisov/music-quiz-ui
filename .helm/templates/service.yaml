@@ -25,7 +25,7 @@ spec:
       match: |
         Host(`quiz.aqua.denisovv.me`)
       services:
-        - name: {{ .Chart.Name }}-service
+        - name: {{ .Chart.Name }}
           port: {{ .Values.service.port }}
   tls:
     certResolver: le
