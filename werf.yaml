@@ -1,0 +1,13 @@
+project: music-quiz-ui
+configVersion: 1
+deploy:
+  namespace: apps
+
+---
+image: music-quiz-ui
+dockerfile: Dockerfile
+context: .
+contextAddFiles:
+  - dist/
+platform:
+  - linux/amd64

@@ -1,0 +1,9 @@
+{{- $env := $.Values.werf.env | default "prod" -}}
+{{- $config := index $.Values.config $env -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $.Chart.Name }}-conf
+data:
+  API_URL: {{ $config.apiUrl }}
+  SOCKET_URL: {{ $config.socketUrl }}

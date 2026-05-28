@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $.Chart.Name }}
+  annotations:
+    werf.io/weight: "30"
+spec:
+  replicas: {{ $.Values.replicas._default }}
+  selector:
+    matchLabels:
+      app: {{ $.Chart.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ $.Chart.Name }}
+    spec:
+      imagePullSecrets:
+        - name: registrysecretgithub
+      containers:
+        - name: app
+          image: {{ index $.Values.werf.image $.Chart.Name }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              envsubst '${API_URL} ${SOCKET_URL}' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf
+              nginx -g 'daemon off;'
+          ports:
+            - containerPort: {{ $.Values.service.port }}
+          env:
+            - name: NODE_ENV
+              value: {{ $.Values.werf.env | quote }}
+          startupProbe:
+            httpGet:
+              port: {{ $.Values.service.port }}
+              path: /
+            failureThreshold: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: {{ $.Values.limits.cpu }}
+              memory: {{ $.Values.limits.memory }}
+            limits:
+              cpu: {{ $.Values.limits.cpu }}
+              memory: {{ $.Values.limits.memory }}
+          envFrom:
+            - configMapRef:
+                name: {{ $.Chart.Name }}-conf

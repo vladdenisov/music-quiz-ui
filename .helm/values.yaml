@@ -1,0 +1,21 @@
+werf:
+  logLevel: debug
+
+limits:
+  cpu: 100m
+  memory: 128Mi
+
+replicas:
+  _default: 1
+
+service:
+  port: 80
+  targetServicePort: 80
+
+app:
+  name: music-quiz-ui
+
+config:
+  prod:
+    apiUrl: http://music-quiz-api.apps.svc.cluster.local:3001
+    socketUrl: http://music-quiz-api.apps.svc.cluster.local:3001
