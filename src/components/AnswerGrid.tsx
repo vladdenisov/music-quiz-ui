@@ -19,13 +19,14 @@ type Props = {
 
 export function AnswerGrid({ options, selectedOptionId, correctOptionId, disabled, resultPlayers, getPlayerName, onSelect }: Props) {
   const hasResult = Boolean(correctOptionId);
+  const unansweredPlayers = hasResult ? resultPlayers?.filter((player) => !player.selectedOptionId) ?? [] : [];
 
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       {options.map((option, index) => {
         const selected = selectedOptionId === option.id;
         const correct = correctOptionId === option.id;
-        const voters = resultPlayers?.filter((player) => player.selectedOptionId === option.id) ?? [];
+        const voters = hasResult ? resultPlayers?.filter((player) => player.selectedOptionId === option.id) ?? [] : [];
         const resultClass = correct ? "bg-[#168a3a] text-cream" : hasResult && voters.length > 0 ? "bg-accent text-cream" : "";
         return (
           <button
@@ -54,17 +55,15 @@ export function AnswerGrid({ options, selectedOptionId, correctOptionId, disable
           </button>
         );
       })}
-      {hasResult && resultPlayers?.some((player) => !player.selectedOptionId) ? (
+      {unansweredPlayers.length > 0 ? (
         <div className="rounded-[22px] bg-cream/70 p-4 sm:col-span-2">
           <div className="label mb-2">Без ответа</div>
           <div className="flex flex-wrap gap-2">
-            {resultPlayers
-              .filter((player) => !player.selectedOptionId)
-              .map((player) => (
-                <span key={player.playerId} className="rounded-full bg-paper px-3 py-1 text-sm font-bold">
-                  {getPlayerName?.(player.playerId) ?? "Игрок"}
-                </span>
-              ))}
+            {unansweredPlayers.map((player) => (
+              <span key={player.playerId} className="rounded-full bg-paper px-3 py-1 text-sm font-bold">
+                {getPlayerName?.(player.playerId) ?? "Игрок"}
+              </span>
+            ))}
           </div>
         </div>
       ) : null}

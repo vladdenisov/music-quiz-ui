@@ -1,18 +1,21 @@
-import { Check, Home, Music, X } from "lucide-react";
+import { Check, Home, Music, RotateCcw, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Leaderboard } from "./Leaderboard";
 import { strings } from "../shared/i18n/strings";
 import type { RoundHistoryEntry } from "../features/room/roomStore";
-import type { LeaderboardEntry } from "../shared/model/types";
+import type { GameSettings, LeaderboardEntry } from "../shared/model/types";
 
 type Props = {
   leaderboard: LeaderboardEntry[];
   roundHistory: RoundHistoryEntry[];
   currentPlayerId?: string;
   totalScore: number;
+  isHost?: boolean;
+  settings: GameSettings;
+  onStart: (settings: GameSettings) => void;
 };
 
-export function GameResultsView({ leaderboard, roundHistory, currentPlayerId, totalScore }: Props) {
+export function GameResultsView({ leaderboard, roundHistory, currentPlayerId, totalScore, isHost, settings, onStart }: Props) {
   const correctCount = roundHistory.filter((r) => r.isCorrect).length;
   const totalCount = roundHistory.length;
 
@@ -39,10 +42,18 @@ export function GameResultsView({ leaderboard, roundHistory, currentPlayerId, to
           </div>
         </section>
 
-        <Link to="/" className="button-primary flex w-full items-center justify-center gap-3">
-          <Home size={22} />
-          {strings.backHome}
-        </Link>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {isHost ? (
+            <button type="button" className="button-primary flex w-full items-center justify-center gap-3" onClick={() => onStart(settings)}>
+              <RotateCcw size={22} />
+              Сыграть ещё
+            </button>
+          ) : null}
+          <Link to="/" className="button-secondary flex w-full items-center justify-center gap-3">
+            <Home size={22} />
+            {strings.backHome}
+          </Link>
+        </div>
       </div>
 
       <Leaderboard entries={leaderboard} currentPlayerId={currentPlayerId} final />
@@ -60,9 +71,9 @@ function TrackCard({ entry }: { entry: RoundHistoryEntry }) {
       }`}
     >
       {entry.artworkUrl ? (
-        <img src={entry.artworkUrl} alt="" className="h-14 w-14 shrink-0 rounded-xl object-cover" />
+        <img src={entry.artworkUrl} alt="" className="size-14 shrink-0 rounded-xl object-cover" />
       ) : (
-        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-cream">
+        <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-cream">
           <Music size={24} className="text-muted" />
         </div>
       )}
@@ -83,7 +94,7 @@ function TrackCard({ entry }: { entry: RoundHistoryEntry }) {
             <span className="font-mono text-xs text-[#168a3a]">+{entry.playerScore}</span>
           )}
         </div>
-        <div className="mt-1 truncate font-bold leading-tight">{entry.correctArtist} — {entry.correctTitle}</div>
+        <div className="mt-1 truncate font-bold leading-tight">{entry.correctArtist}: {entry.correctTitle}</div>
         {entry.album && <div className="truncate text-sm text-muted">{entry.album}</div>}
         {!entry.isCorrect && selectedOption && (
           <div className="mt-1 text-sm text-accent">

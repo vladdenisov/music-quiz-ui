@@ -26,4 +26,32 @@ describe("AnswerGrid", () => {
     expect(screen.getByRole("button", { name: /Hung Up/i })).toBeDisabled();
     expect(screen.getByText("Ответ принят")).toBeInTheDocument();
   });
+
+  it("does not show player choices before round result is available", () => {
+    render(
+      <AnswerGrid
+        options={options}
+        selectedOptionId="a"
+        resultPlayers={[{ playerId: "p1", selectedOptionId: "a", isCorrect: true, score: 900 }]}
+        getPlayerName={() => "Лена"}
+        onSelect={vi.fn()}
+      />
+    );
+
+    expect(screen.queryByText(/Лена/)).not.toBeInTheDocument();
+  });
+
+  it("shows player choices after round result is available", () => {
+    render(
+      <AnswerGrid
+        options={options}
+        correctOptionId="a"
+        resultPlayers={[{ playerId: "p1", selectedOptionId: "a", isCorrect: true, score: 900 }]}
+        getPlayerName={() => "Лена"}
+        onSelect={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText(/Лена · 900/)).toBeInTheDocument();
+  });
 });

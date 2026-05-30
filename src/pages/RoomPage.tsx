@@ -97,7 +97,13 @@ export function RoomPage() {
           <div className="label mb-3">{roomCode}</div>
           <h1 className="mb-4 font-display text-4xl uppercase">{strings.noSession}</h1>
           <form onSubmit={handleJoin} className="space-y-4">
-            <input className="field" placeholder="Имя игрока" value={nickname} onChange={(event) => setNickname(event.target.value)} />
+            <input
+              className="field"
+              aria-label="Имя игрока"
+              placeholder="Имя игрока"
+              value={nickname}
+              onChange={(event) => setNickname(event.target.value)}
+            />
             <button type="submit" className="button-primary flex w-full items-center justify-center gap-3" disabled={joining}>
               <DoorOpen size={22} />
               {joining ? "Подключаемся" : strings.joinRoom}
@@ -123,6 +129,9 @@ export function RoomPage() {
           roundHistory={roundHistory}
           currentPlayerId={session.playerId}
           totalScore={leaderboard.find((e) => e.playerId === session.playerId)?.score ?? 0}
+          isHost={isHost}
+          settings={room.settings}
+          onStart={startGame}
         />
       ) : (
         <GameView
