@@ -17,6 +17,20 @@ import type {
 
 type ConnectionState = "idle" | "connecting" | "connected" | "disconnected" | "reconnecting";
 
+export type RoundHistoryEntry = {
+  roundNumber: number;
+  questionType: string;
+  correctTitle: string;
+  correctArtist: string;
+  album?: string;
+  artworkUrl?: string;
+  isCorrect: boolean;
+  playerScore: number;
+  selectedOptionId?: string;
+  correctOptionId: string;
+  options: { id: string; label: string }[];
+};
+
 type RoomStore = {
   session?: Session;
   room?: PublicRoomState;
@@ -24,6 +38,7 @@ type RoomStore = {
   roundResult?: RoundResultState;
   leaderboard: LeaderboardEntry[];
   roundOutcomes: Record<number, "correct" | "wrong">;
+  roundHistory: RoundHistoryEntry[];
   generationOptions?: GenerationOptions;
   preparing?: GamePreparingState;
   selectedOptionId?: string;
@@ -51,6 +66,7 @@ type StoreSet = (partial: Partial<RoomStore> | ((state: RoomStore) => Partial<Ro
 export const useRoomStore = create<RoomStore>((set, get) => ({
   leaderboard: [],
   roundOutcomes: {},
+  roundHistory: [],
   connectionState: "idle",
 
   async loadGenerationOptions() {
@@ -122,7 +138,7 @@ export const useRoomStore = create<RoomStore>((set, get) => ({
   startGame(settings) {
     const { socket, session } = get();
     if (!socket || !session) return;
-    set({ preparing: buildLocalPreparing(session.roomCode, settings), roundOutcomes: {}, roundResult: undefined, selectedOptionId: undefined, answer: undefined });
+    set({ preparing: buildLocalPreparing(session.roomCode, settings), roundOutcomes: {}, roundHistory: [], roundResult: undefined, selectedOptionId: undefined, answer: undefined });
     emitStart(socket, session.roomCode, session.playerId, settings);
   },
 
@@ -161,7 +177,7 @@ function bindSocket(socket: MusicQuizSocket, set: StoreSet, get: () => RoomStore
   socket.io.on("reconnect_attempt", () => set({ connectionState: "reconnecting" }));
   socket.on("room:state", (state) => setFromRoomState(state, set));
   socket.on("game:started", (state) => {
-    set({ preparing: undefined, roundOutcomes: {}, roundResult: undefined, selectedOptionId: undefined, answer: undefined });
+    set({ preparing: undefined, roundOutcomes: {}, roundHistory: [], roundResult: undefined, selectedOptionId: undefined, answer: undefined });
     setFromRoomState(state, set);
   });
   socket.on("game:preparing", (preparing) => set({ preparing }));
@@ -173,6 +189,21 @@ function bindSocket(socket: MusicQuizSocket, set: StoreSet, get: () => RoomStore
     const state = get();
     const roundNumber = state.activeRound?.roundNumber;
     const playerResult = roundResult.playerResults.find((result) => result.playerId === state.session?.playerId);
+    const historyEntry: RoundHistoryEntry | undefined = roundNumber
+      ? {
+          roundNumber,
+          questionType: state.activeRound?.questionType ?? "guess_song",
+          correctTitle: roundResult.correctTitle,
+          correctArtist: roundResult.correctArtist,
+          album: roundResult.album,
+          artworkUrl: roundResult.artworkUrl,
+          isCorrect: playerResult?.isCorrect ?? false,
+          playerScore: playerResult?.score ?? 0,
+          selectedOptionId: playerResult?.selectedOptionId,
+          correctOptionId: roundResult.correctOptionId,
+          options: state.activeRound?.options ?? []
+        }
+      : undefined;
     set({
       roundResult,
       roundOutcomes:
@@ -181,7 +212,8 @@ function bindSocket(socket: MusicQuizSocket, set: StoreSet, get: () => RoomStore
               ...state.roundOutcomes,
               [roundNumber]: playerResult.isCorrect ? "correct" : "wrong"
             }
-          : state.roundOutcomes
+          : state.roundOutcomes,
+      roundHistory: historyEntry ? [...state.roundHistory, historyEntry] : state.roundHistory
     });
   });
   socket.on("leaderboard:updated", (leaderboard) => set({ leaderboard }));

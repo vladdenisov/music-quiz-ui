@@ -68,4 +68,16 @@ button:disabled {
   .chip {
     @apply rounded-full border-[3px] border-line bg-cream px-4 py-2 font-mono text-xs uppercase;
   }
+
+  .volume-slider {
+    @apply h-1.5 cursor-pointer appearance-none rounded-full bg-line;
+  }
+
+  .volume-slider::-webkit-slider-thumb {
+    @apply h-4 w-4 appearance-none rounded-full border-2 border-line bg-accent shadow-sm;
+  }
+
+  .volume-slider::-moz-range-thumb {
+    @apply h-4 w-4 appearance-none rounded-full border-2 border-line bg-accent shadow-sm;
+  }
 }

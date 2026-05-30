@@ -3,8 +3,8 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Brand } from "../components/Brand";
 import { ConnectionBanner } from "../components/ConnectionBanner";
+import { GameResultsView } from "../components/GameResultsView";
 import { GameView } from "../components/GameView";
-import { Leaderboard } from "../components/Leaderboard";
 import { LobbyView } from "../components/LobbyView";
 import { PreparingView } from "../components/PreparingView";
 import { useRoomStore } from "../features/room/roomStore";
@@ -21,6 +21,7 @@ export function RoomPage() {
     activeRound,
     roundResult,
     roundOutcomes,
+    roundHistory,
     leaderboard,
     generationOptions,
     preparing,
@@ -117,12 +118,12 @@ export function RoomPage() {
           onStart={() => startGame(room.settings ?? defaultSettings)}
         />
       ) : room.status === "ended" ? (
-        <section className="mx-auto max-w-3xl">
-          <Leaderboard entries={leaderboard} currentPlayerId={session.playerId} final />
-          <Link to="/" className="button-primary mt-6 flex w-full justify-center">
-            {strings.backHome}
-          </Link>
-        </section>
+        <GameResultsView
+          leaderboard={leaderboard}
+          roundHistory={roundHistory}
+          currentPlayerId={session.playerId}
+          totalScore={leaderboard.find((e) => e.playerId === session.playerId)?.score ?? 0}
+        />
       ) : (
         <GameView
           round={activeRound}
